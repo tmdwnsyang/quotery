@@ -32,9 +32,9 @@ def get_quotes_from_pages():
 # get the most common tags in the site
 
 
-def find_most_common_tags():
+def find_most_common_tags(quotes):
     print('Fetching tags and sorting by frequencies...')
-    quotes = get_quotes_from_pages()
+    # quotes = get_quotes_from_pages()
 
     tag_freq = {}
 
@@ -63,89 +63,102 @@ def find_most_common_tags():
     plt.xticks(rotation=90)
     plt.show()
 
+def printDash(l):
+    [print('-',end='') for c in l]
+    print()
+
 # takes in an author's name as a paratemeters and returns the tags associated with them
+def list_quote_types_by_author(quotes):
 
-
-def list_quote_types_by_author():
-
-    quotes = get_quotes_from_pages()
+    # quotes = get_quotes_from_pages()
     quotes_by_author_dict = collections.defaultdict(list)
 
     # For each quote...
     for quote in quotes:
         # Gathering author name
         author_name = quote.find('small', class_='author').get_text()
-        # Gathering all relevant tags 
+        # Gathering all relevant tags
         rel_tags = [tags.get_text() for tags in quote.find(
             'div', {'class': 'tags'}).findAll('a', recursive=False)]
         # Placing (author name, tags) in tupples and adding to dict.
         quotes_by_author_dict[author_name].append(
             (quote.find('span', class_='text').get_text(), rel_tags))
-        
     [print("> " + names) for names in quotes_by_author_dict.keys()]
 
     print("Please enter the author's name to display all relevant quotes followed by relevant tags: ")
-    famous_author = input()
+    user_author = input()
     while True:
-        if (famous_author == 'next'):
+        if (user_author == 'menu'):
             break
-        if (famous_author not in quotes_by_author_dict.keys()):
+        if (user_author not in quotes_by_author_dict.keys()):
             print('There are no quotes by this author. Please choose another:')
         else:
-            for (quote, tags) in quotes_by_author_dict[author_name]:
-                print('> ' + quote)
+            printDash(user_author)
+
+            for (quote, tags) in quotes_by_author_dict[user_author]:
+                print(quote)
                 for tag in tags:
-                    print(' |_'+ tag)
-            print('Please enter a another author name to view more. Otherwise, type "next".')
-        famous_author = input()
+                    print(' |_' + tag)
+            printDash(user_author)
+            print(
+                'Please enter another author name to view more. Otherwise, type "menu".')
+        user_author = input()
 
 
 # takes in a tag as a parameter and returns the quotes associated with that tag
-def search_quotes_by_tag(tag):
-    quotes = get_quotes_from_pages()
-    found_quotes = []
-
+def search_quotes_by_tag(quotes):
+    # quotes = get_quotes_from_pages()
+    tag_quote_dict = collections.defaultdict(list)
     for quote in quotes:
-        tags = quote.find_all('a', href=True, attrs={'class': 'tag'})
-        for quote_tag in tags:
-            if quote_tag.text.lower() == tag.lower():
-                quote_text = quote.find('span', class_='text').text.strip()
-                found_quotes.append(quote_text)
+        tags = [tags.get_text() for tags in quote.find(
+            'div', {'class': 'tags'}).findAll('a', recursive=False)]
+        for t in tags:
+            tag_quote_dict[t].append(quote.find(
+                'span', class_='text').get_text())
 
-    return found_quotes
+    [print('> ', x) for x in tag_quote_dict.keys()]
+    print("Please select a tag from the above. Type 'menu' to go to options. ")
+    
+    user_tag = input().lower()
+    while True:
+        if (user_tag == 'menu'):
+            print('Exiting application...')
+            return
+        if (user_tag not in tag_quote_dict.keys()):
+            print("Please choose a valid tag!")
+        else:
+            printDash(user_tag)
+            [print(q) for q in tag_quote_dict[user_tag]]
+            printDash(user_tag)
+
+            print('Please select a tag. Otherwise, please enter \'menu\'')
+        user_tag = input().lower()
 
 
 def main():
     # get most common tags across all quotes
-    find_most_common_tags()
-
-    list_quote_types_by_author()
-
-    l = set()
     quotes = get_quotes_from_pages()
-    for quote in quotes:
-        tags = quote.find_all('a', href=True, attrs={'class': 'tag'})
-        for tag in tags:
-            l.add(tag.text.lower())
 
-    for x in l:
-        print('> ', x)
-    print("Please select a tag from the above. Type 'exit' to exit. ")
-
-    user_input = input().lower()
     while True:
-        if (user_input == 'exit'):
-            print('Exiting application...')
-            return
-        if (user_input not in l):
-            print("Please choose a valid tag!")
+        print("Select from the following options:")
+        print(" 1. Search quotes by tag.")
+        print(" 2. Search quotes by author and display relevant tags.")
+        print(" 3. Display most common tags.")
+        print(" 4. Exit.")
 
-        else:
-            quotes_with_tag = search_quotes_by_tag(user_input)
-            for quote in quotes_with_tag:
-                print(quote, '\n')
-            print('Please select a tag. Otherwise, please enter \'exit\'')
-        user_input = input().lower()
+        user_choice = input().lower()
+        match user_choice:
+            case "1":
+                search_quotes_by_tag(quotes)
+            case "2":
+                list_quote_types_by_author(quotes)
+            case "3":
+                find_most_common_tags(quotes)
+            case "4":
+                print("Exiting...")
+                return
+            case _:
+                print("Invalid input!")
 
 
 main()
