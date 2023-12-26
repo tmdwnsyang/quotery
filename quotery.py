@@ -19,8 +19,7 @@ def get_quotes_from_pages():
         quotes_on_page = soup.find_all('div', attrs={'class': 'quote'})
         quotes.extend(quotes_on_page)
 
-        next_page = soup.find('li', class_='next')
-        if next_page:
+        if next_page := soup.find('li', class_='next'):
             url = base_url + next_page.a['href']
             page = requests.get(url)
             soup = BeautifulSoup(page.content, 'html.parser')
