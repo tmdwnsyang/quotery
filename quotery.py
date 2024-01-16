@@ -8,7 +8,7 @@ def get_quotes_from_pages():
     print('Reaching https://quotes.toscrape.com/...')
     base_url = "https://quotes.toscrape.com/"
     url = base_url + "/page/1"  # first page of quotes
-    page = requests.get(url)
+    page = requests.get(url, timeout=60)
     soup = BeautifulSoup(page.content, 'html.parser')
 
     quotes = []
@@ -22,7 +22,7 @@ def get_quotes_from_pages():
         next_page = soup.find('li', class_='next')
         if next_page:
             url = base_url + next_page.a['href']
-            page = requests.get(url)
+            page = requests.get(url, timeout=60)
             soup = BeautifulSoup(page.content, 'html.parser')
         else:
             break
