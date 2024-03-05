@@ -2,6 +2,7 @@ import requests
 from bs4 import BeautifulSoup
 import matplotlib.pyplot as plt
 import collections
+from security import safe_requests
 
 
 def get_quotes_from_pages():
@@ -22,7 +23,7 @@ def get_quotes_from_pages():
         next_page = soup.find('li', class_='next')
         if next_page:
             url = base_url + next_page.a['href']
-            page = requests.get(url)
+            page = safe_requests.get(url)
             soup = BeautifulSoup(page.content, 'html.parser')
         else:
             break
